@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import './index.css';
 
 const steps = [
   {
-    title: 'Шаг 1: Проверка сроков исполнения контракта',
+    title: 'Шаг 1 из 4: Проверка сроков исполнения контракта',
     questions: [
       {
         text: '1. Указаны ли сроки в контракте и приложениях?',
@@ -27,7 +28,7 @@ const steps = [
     ]
   },
   {
-    title: 'Шаг 2: Проверка качества поставленной продукции',
+    title: 'Шаг 2 из 4: Проверка качества поставленной продукции',
     questions: [
       {
         text: '1. Имеется ли акт приёмки с отметкой об отсутствии дефектов?',
@@ -66,25 +67,27 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
+    <div className="wrapper">
       <h1>{step.title}</h1>
       <form>
         {step.questions.map((q, i) => (
-          <div key={i}>
+          <div key={i} className="question">
             <p>{q.text}</p>
-            {q.options.includes('Загрузить документ') ? (
-              <input type="file" />
-            ) : (
-              q.options.map((opt, j) => (
-                <label key={j} style={{ marginRight: '10px' }}>
-                  <input type="radio" name={`q${i}`} /> {opt}
-                </label>
-              ))
-            )}
-            <p><i>{q.hint}</i></p>
+            <div className="options">
+              {q.options.includes('Загрузить документ') ? (
+                <input type="file" />
+              ) : (
+                q.options.map((opt, j) => (
+                  <label key={j}>
+                    <input type="radio" name={`q${i}`} /> {opt}
+                  </label>
+                ))
+              )}
+            </div>
+            <div className="hint">{q.hint}</div>
           </div>
         ))}
-        <button type="button" onClick={next}>Далее</button>
+        <button type="button" className="btn-next" onClick={next}>Далее</button>
       </form>
     </div>
   );
