@@ -1,70 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from './assets/goz-logo.png';
-
-const steps = [
-  {
-    title: 'Шаг 1 из 4: Проверка сроков исполнения контракта',
-    questions: [
-      {
-        text: 'Указаны ли сроки в контракте и приложениях?',
-        options: ['Да', 'Нет'],
-        hint: 'Сроки ищите в контракте (раздел 3)',
-      },
-      {
-        text: 'Имеется ли акт приёмки с датой поставки?',
-        options: ['Да', 'Нет'],
-        hint: 'Дата — в акте приёмки',
-      },
-      {
-        text: 'Соответствуют ли даты поставки условиям контракта?',
-        options: ['Да', 'Нет', 'Частично'],
-        hint: 'Сравните акт и условия контракта',
-      },
-      {
-        text: 'Есть ли уведомления о переносе сроков?',
-        options: ['Да', 'Нет'],
-        hint: 'Письма/телеграммы об изменении сроков',
-        file: true,
-      },
-    ],
-  },
-  {
-    title: 'Шаг 2 из 4: Проверка качества поставленной продукции',
-    questions: [
-      {
-        text: 'Имеется ли акт приёмки с отметкой об отсутствии дефектов?',
-        options: ['Да', 'Нет'],
-        hint: 'Проверьте акт КС-2, КС-3 или по ГОСТ Р 15.201',
-      },
-      {
-        text: 'Указаны ли конкретные характеристики продукции в акте приёмки?',
-        options: ['Да', 'Нет'],
-        hint: 'Сравните с техническим заданием',
-      },
-      {
-        text: 'Есть ли результаты лабораторных/входных испытаний?',
-        options: ['Да', 'Нет', 'Не требуется'],
-        hint: 'Если предусмотрено ТЗ – прилагаются испытания',
-      },
-      {
-        text: 'Продукция принята без замечаний по качеству?',
-        options: ['Да', 'Нет', 'Частично'],
-        hint: 'Ищите подписи и отметки в акте',
-      },
-      {
-        text: 'Присутствуют ли технические условия (ТУ), КД, ТЗ, описывающие требования к качеству?',
-        options: ['Да', 'Нет'],
-        hint: 'Технические условия, чертежи, спецификации — обязательны для оценки соответствия продукции ТЗ',
-      },
-      {
-        text: 'Зафиксировано ли соответствие продукции условиям контракта (ГОСТ, ТУ и т.д.)?',
-        options: ['Да', 'Нет'],
-        hint: 'Сравните фактические показатели из акта/испытаний с требованиями КД',
-      },
-    ],
-  }
-];
+import steps from './steps.json';
 
 export default function App() {
   const [stepIndex, setStepIndex] = useState(0);
@@ -73,48 +10,92 @@ export default function App() {
 
   const handleChange = (qIndex, value) => {
     const stepKey = `step-${stepIndex}`;
-    const stepAnswers = answers[stepKey] || {};
-    stepAnswers[qIndex] = value;
-    setAnswers({ ...answers, [stepKey]: stepAnswers });
+    const current = answers[stepKey] || {};
+    current[qIndex] = value;
+    setAnswers({ ...answers, [stepKey]: current });
+  };
+
+  const isVisible = (q, qIndex) => {
+    if (!q.visibleIf) return true;
+    const dep = Object.entries(q.visibleIf)[0];
+    const dependsOnIndex = parseInt(dep[0].replace("q", ""));
+    const requiredValue = dep[1];
+    const stepKey = `step-${stepIndex}`;
+    const current = answers[stepKey] || {};
+    return current[dependsOnIndex] === requiredValue;
   };
 
   const next = () => {
     if (stepIndex < steps.length - 1) {
       setStepIndex(stepIndex + 1);
-    } else {
-      alert('Проверка завершена!');
     }
   };
 
+  const getFinalReport = () => {
+    return steps.map((step, sIndex) => {
+      const stepKey = `step-${sIndex}`;
+      return {
+        title: step.title,
+        answers: step.questions.map((q, qIndex) => ({
+          question: q.text,
+          answer: answers[stepKey]?.[qIndex] || "-"
+        }))
+      };
+    });
+  };
+
   return (
-    <div style={{ padding: 20, maxWidth: 800, margin: 'auto' }}>
-      <img src={logo} alt="logo" width="80" />
-      <h2>{step.title}</h2>
+    <div style={{ padding: 20, maxWidth: 1000, margin: 'auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <img src={logo} alt="logo" width="50" />
+        <h2>GOZ Checker</h2>
+      </div>
+      <h3>{step.title}</h3>
       <form>
-        {step.questions.map((q, i) => (
-          <div key={i} style={{ marginBottom: 20 }}>
-            <p><b>{i + 1}. {q.text}</b> {q.hint && <span style={{ color: 'gray' }} title={q.hint}> ℹ️</span>}</p>
-            {q.options.map(opt => (
-              <label key={opt} style={{ display: 'block', marginLeft: 20 }}>
-                <input
-                  type="radio"
-                  name={`q-${stepIndex}-${i}`}
-                  value={opt}
-                  checked={answers[`step-${stepIndex}`]?.[i] === opt}
-                  onChange={(e) => handleChange(i, e.target.value)}
-                />{' '}
-                {opt}
-              </label>
-            ))}
-            {q.file && (
-              <div style={{ marginLeft: 20, marginTop: 4 }}>
-                <input type="file" />
-              </div>
-            )}
-          </div>
-        ))}
+        {step.questions.map((q, qIndex) =>
+          isVisible(q, qIndex) ? (
+            <div key={qIndex} style={{ marginBottom: 20, background: '#fff', padding: 15, borderRadius: 6 }}>
+              <p style={{ marginBottom: 6 }}>
+                <b>{qIndex + 1}. {q.text}</b>{" "}
+                {q.hint && <span title={q.hint} style={{ cursor: 'help', color: 'blue' }}>ℹ️</span>}
+              </p>
+              {q.options.map((opt, idx) => (
+                <label key={idx} style={{ display: 'block', marginLeft: 12 }}>
+                  <input
+                    type="radio"
+                    name={`q-${stepIndex}-${qIndex}`}
+                    value={opt}
+                    checked={answers[`step-${stepIndex}`]?.[qIndex] === opt}
+                    onChange={(e) => handleChange(qIndex, e.target.value)}
+                  /> {opt}
+                </label>
+              ))}
+              {q.file && (
+                <div style={{ marginTop: 8, marginLeft: 12 }}>
+                  <input type="file" />
+                </div>
+              )}
+            </div>
+          ) : null
+        )}
         <button type="button" onClick={next}>Далее</button>
       </form>
+
+      {stepIndex === steps.length - 1 && (
+        <div style={{ marginTop: 40, padding: 20, background: '#e7f5e1', borderRadius: 8 }}>
+          <h3>📄 Финальный отчёт:</h3>
+          {getFinalReport().map((s, i) => (
+            <div key={i} style={{ marginBottom: 20 }}>
+              <h4>{s.title}</h4>
+              <ul>
+                {s.answers.map((a, j) => (
+                  <li key={j}><b>{a.question}</b><br />Ответ: {a.answer}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
