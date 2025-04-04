@@ -34,6 +34,13 @@ export default function App() {
     }
   };
 
+  const back = () => {
+    if (stepIndex > 0) {
+      setStepIndex(stepIndex - 1);
+      setVisibleHint(null);
+    }
+  };
+
   const getFinalReport = () => {
     return steps.map((step, sIndex) => {
       const stepKey = `step-${sIndex}`;
@@ -115,16 +122,26 @@ export default function App() {
             </div>
           ) : null
         )}
-        <button type="button" onClick={next} style={{
-          marginTop: 20,
-          background: '#004d26',
-          color: '#fff',
-          padding: '10px 18px',
-          border: 'none',
-          borderRadius: 6,
-          fontWeight: 'bold',
-          cursor: 'pointer'
-        }}>Далее</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+          <button type="button" onClick={back} disabled={stepIndex === 0} style={{
+            background: '#ccc',
+            color: '#000',
+            padding: '10px 18px',
+            border: 'none',
+            borderRadius: 6,
+            fontWeight: 'bold',
+            cursor: stepIndex === 0 ? 'not-allowed' : 'pointer'
+          }}>Назад</button>
+          <button type="button" onClick={next} style={{
+            background: '#004d26',
+            color: '#fff',
+            padding: '10px 18px',
+            border: 'none',
+            borderRadius: 6,
+            fontWeight: 'bold',
+            cursor: 'pointer'
+          }}>Далее</button>
+        </div>
       </form>
 
       {stepIndex === steps.length - 1 && (
