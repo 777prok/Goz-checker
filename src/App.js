@@ -1,11 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import logo from './assets/goz-logo.png';
 import steps from './steps.json';
 
 export default function App() {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [visibleHint, setVisibleHint] = useState(null);
+
   const step = steps[stepIndex];
 
   const handleChange = (qIndex, value) => {
@@ -28,6 +30,7 @@ export default function App() {
   const next = () => {
     if (stepIndex < steps.length - 1) {
       setStepIndex(stepIndex + 1);
+      setVisibleHint(null);
     }
   };
 
@@ -45,20 +48,54 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 1000, margin: 'auto' }}>
+    <div style={{ padding: 20, maxWidth: 1000, margin: 'auto', fontFamily: 'Arial' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <img src={logo} alt="logo" width="50" />
-        <h2>GOZ Checker</h2>
+        <h2 style={{ color: '#003300' }}>GOZ Checker</h2>
       </div>
       <h3>{step.title}</h3>
       <form>
         {step.questions.map((q, qIndex) =>
           isVisible(q, qIndex) ? (
-            <div key={qIndex} style={{ marginBottom: 20, background: '#fff', padding: 15, borderRadius: 6 }}>
+            <div key={qIndex} style={{
+              marginBottom: 20,
+              background: '#ffffff',
+              padding: 15,
+              borderRadius: 6,
+              border: '1px solid #ccc'
+            }}>
               <p style={{ marginBottom: 6 }}>
-                <b>{qIndex + 1}. {q.text}</b>{" "}
-                {q.hint && <span title={q.hint} style={{ cursor: 'help', color: 'blue' }}>ℹ️</span>}
+                <b>{qIndex + 1}. {q.text}</b>
+                {q.hint && (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleHint(visibleHint === qIndex ? null : qIndex)}
+                    style={{
+                      marginLeft: 10,
+                      background: '#004d26',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 4,
+                      padding: '2px 8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ℹ️ Подсказка
+                  </button>
+                )}
               </p>
+              {visibleHint === qIndex && (
+                <div style={{
+                  background: '#f0f8f5',
+                  border: '1px solid #004d26',
+                  padding: 10,
+                  borderRadius: 4,
+                  marginBottom: 10,
+                  color: '#002211'
+                }}>
+                  {q.hint}
+                </div>
+              )}
               {q.options.map((opt, idx) => (
                 <label key={idx} style={{ display: 'block', marginLeft: 12 }}>
                   <input
@@ -78,7 +115,16 @@ export default function App() {
             </div>
           ) : null
         )}
-        <button type="button" onClick={next}>Далее</button>
+        <button type="button" onClick={next} style={{
+          marginTop: 20,
+          background: '#004d26',
+          color: '#fff',
+          padding: '10px 18px',
+          border: 'none',
+          borderRadius: 6,
+          fontWeight: 'bold',
+          cursor: 'pointer'
+        }}>Далее</button>
       </form>
 
       {stepIndex === steps.length - 1 && (
