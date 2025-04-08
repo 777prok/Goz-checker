@@ -1,6 +1,6 @@
 {
   "name": "GOZ Checker",
-  "short_name": "GOZ",
+  "short_name": "GOZ Checker",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
