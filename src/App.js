@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react';
 import steps from './steps.json';
+import logo from '../public/icons/icon-192.png';
 
 export default function App() {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [visibleHint, setVisibleHint] = useState(null);
+  const [showHelp, setShowHelp] = useState(false);
   const step = steps[stepIndex];
 
   const handleChange = (qIndex, value) => {
@@ -29,8 +31,40 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: 20, maxWidth: 800, margin: 'auto', fontFamily: 'Arial' }}>
-      <h2 style={{ color: '#003300' }}>{step.title}</h2>
+    <div style={{ padding: 20, maxWidth: 900, margin: 'auto', fontFamily: 'Arial' }}>
+      <header style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+        <img src={logo} alt="logo" width="48" height="48" />
+        <h2 style={{ margin: 0, color: '#003300' }}>GOZ Checker</h2>
+      </header>
+
+      <h3>{step.title}</h3>
+
+      {stepIndex === 3 && (
+        <div style={{ marginBottom: 20 }}>
+          <button onClick={() => setShowHelp(!showHelp)} style={{
+            padding: '8px 12px',
+            backgroundColor: '#004d26',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            cursor: 'pointer'
+          }}>
+            📄 Справка по затратному методу
+          </button>
+          {showHelp && (
+            <div style={{ backgroundColor: '#f4f4f4', border: '1px solid #ccc', padding: 15, marginTop: 10 }}>
+              <b>Что должно быть в калькуляции:</b>
+              <ul>
+                <li>🔹 Материалы, з/п, ОХР, прибыль</li>
+                <li>🔹 Подтверждающие документы: накладные, табели, акты</li>
+                <li>🔹 Где смотреть в 1С: счета 20, 25, 26</li>
+                <li>🔹 Основание: ПП №1465, п. 15–19</li>
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
       <form>
         {step.questions.map((q, i) => {
           const show = !q.visibleIf || Object.entries(q.visibleIf).every(([k, v]) => {
@@ -41,11 +75,10 @@ export default function App() {
 
           return (
             <div key={i} style={{ marginBottom: 20 }}>
-              <p style={{ fontWeight: 'bold' }}>
-                {i + 1}. {q.text}
+              <p><b>{i + 1}. {q.text}</b>{" "}
                 {q.hint && (
-                  <button type="button" onClick={() => setVisibleHint(visibleHint === i ? null : i)}
-                    style={{ marginLeft: 10, background: '#004d26', color: '#fff', border: 'none', borderRadius: 4, padding: '2px 6px' }}>
+                  <button onClick={() => setVisibleHint(visibleHint === i ? null : i)} type="button"
+                    style={{ marginLeft: 10, background: '#004d26', color: '#fff', border: 'none', borderRadius: 4, padding: '2px 8px' }}>
                     ℹ️
                   </button>
                 )}
@@ -66,11 +99,6 @@ export default function App() {
                   /> {opt}
                 </label>
               ))}
-              {q.file && (
-                <div style={{ marginLeft: 16, marginTop: 6 }}>
-                  <input type="file" />
-                </div>
-              )}
             </div>
           );
         })}
