@@ -1,10 +1,10 @@
 {
   "name": "GOZ Checker",
-  "short_name": "GOZ",
+  "short_name": "GOZ Checker",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#003366",
+  "theme_color": "#003300",
   "icons": [
     {
       "src": "icons/icon-192.png",
