@@ -1,5 +1,5 @@
 import React from 'react';
 function App() {
-  return <div>GOZ Checker App – логика будет встроена.</div>;
+  return <div style={{ padding: 20 }}><h1>GOZ Checker загружен ✅</h1></div>;
 }
 export default App;
